@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Post-its</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <script type="module" src="js/index.js"></script>
+</head>
+<body>
+    <h1>Seccion de notas</h1>
+    <main class="tablero">
+        <button id="crearNota">+</button>
+
+        <div id="modalNota" class="oculto">
+            <div>
+                <h2 id="titulo"></h2>
+                <textarea name="area" id="area" rows="9" cols="45" style="background-color: blanchedalmond;"></textarea>
+                <div id="colores">
+                    <button id="blanco">Blanco</button>
+                    <button id="negro">Negro</button>
+                    <button id="verde">Verde</button>
+                    <button id="amarillo">Amarillo</button>
+                    <button id="azul">Azul</button>
+                </div>
+
+                <button id="guardar">Guardar</button>
+                <button id="cancelar">Cancelar</button>
+
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

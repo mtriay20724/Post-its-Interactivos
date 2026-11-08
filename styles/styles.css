@@ -1,0 +1,121 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+h1 {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    margin: 0;
+    font-size: 20px;
+    z-index: 10;
+}
+
+.tablero {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: antiquewhite;
+    touch-action: none;
+}
+
+.postit {
+    position: absolute;
+    width: 150px;
+    min-height: 150px;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff475;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    touch-action: none;
+    user-select: none;
+}
+
+.arrastrando {
+    z-index: 100;
+    box-shadow: 4px 8px 12px rgba(0, 0, 0, 0.4);
+}
+
+.deslizando {
+    opacity: 0.5;
+}
+
+.volviendo {
+    transition: transform 0.3s, left 0.3s, top 0.3s, opacity 0.3s;
+}
+
+#crearNota {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background-color: orange;
+    color: white;
+    font-size: 30px;
+    z-index: 50;
+    touch-action: none;
+    user-select: none;
+}
+
+#modalNota {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#modalNota > div {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+#area {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+#colores {
+    margin: 10px 0;
+}
+
+#colores button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #999;
+    border-radius: 50%;
+    font-size: 0;
+}
+
+#blanco { background-color: white; }
+#negro { background-color: black; }
+#verde { background-color: #b8f2a0; }
+#amarillo { background-color: #fff475; }
+#azul { background-color: #9fd3f5; }
+
+.seleccionado {
+    border: 3px solid black !important;
+}
+
+#guardar {
+    padding: 8px 16px;
+}
+
+.oculto {
+    display: none !important;
+}
