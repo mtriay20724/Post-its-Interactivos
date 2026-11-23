@@ -1,4 +1,5 @@
-import { db } from "./firebase_config.js";
+import { db, auth } from "./firebase_config.js";
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
  
 let BotonMas = document.getElementById("crearNota");
@@ -29,8 +30,11 @@ BotonMas.addEventListener("touchmove", (e)=>{
  
     BotonMas.style.right = "auto";
     BotonMas.style.bottom = "auto";
-    BotonMas.style.top = `${toque.clientY - offsetY}px`;
-    BotonMas.style.left = `${toque.clientX - offsetX}px`;
+    // el boton tampoco puede salirse de la pantalla
+    let x = limitar(toque.clientX - offsetX, 0, window.innerWidth - BotonMas.offsetWidth);
+    let y = limitar(toque.clientY - offsetY, 0, window.innerHeight - BotonMas.offsetHeight);
+    BotonMas.style.top = `${y}px`;
+    BotonMas.style.left = `${x}px`;
     mover = true;
 });
  
@@ -41,6 +45,11 @@ BotonMas.addEventListener("touchend", (e)=>{
     }
 });
  
+// devuelve el valor dentro del rango [min, max]
+function limitar(valor, min, max){
+    return Math.max(min, Math.min(valor, max));
+}
+
 function abrirModal(){
     idEditar = null;
     titulo.textContent = "Nueva nota";
@@ -66,8 +75,23 @@ document.getElementById("azul").addEventListener("click", function() {
     colorFondo("#9fd3f5");
 });
  
+// id del boton de cada color, para marcar cual esta seleccionado
+let botonesColor = {
+    "white": "blanco",
+    "black": "negro",
+    "#b8f2a0": "verde",
+    "#fff475": "amarillo",
+    "#9fd3f5": "azul"
+};
+
 function colorFondo(color){
     colorPost = color;
+
+    document.querySelectorAll("#colores button").forEach((b)=> b.classList.remove("seleccionado"));
+    if(botonesColor[color]){
+        document.getElementById(botonesColor[color]).classList.add("seleccionado");
+    }
+
     area.style.backgroundColor = color;
  
     if(color == "black"){
@@ -85,7 +109,7 @@ botonCancelar.addEventListener("click", ()=>{
 });
  
 async function guardarNota(){
-    let texto = area.value;
+    let texto = area.value.trim();
  
     if(texto == ""){
         alert("Escribe algo en la nota");
@@ -99,8 +123,8 @@ async function guardarNota(){
         let nuevoPostIt = {
             texto: texto,
             color: colorPost,
-            coordenadasX: window.innerWidth / 2 - 75,
-            coordenadasY: window.innerHeight / 2 - 75,
+            coordenadaX: window.innerWidth / 2 - 75,
+            coordenadaY: window.innerHeight / 2 - 75,
             fechaCreacion: new Date()
         };
  
@@ -117,22 +141,120 @@ async function guardarNota(){
 }
  
  
-// Cada vez que cambia algo en Firebase se borran los post-its y se vuelven a pintar
-onSnapshot(collection(db, "post-it"), (datos)=>{
-    document.querySelectorAll(".postit").forEach((p)=> p.remove());
- 
-    datos.forEach((documento)=>{
-        crearPostIt(documento.id, documento.data());
-    });
+// ===================== LOGIN =====================
+let pantallaLogin = document.getElementById("pantallaLogin");
+let pantallaPostits = document.getElementById("pantallaPostits");
+let formLogin = document.getElementById("formLogin");
+let inputEmail = document.getElementById("email");
+let inputContrasena = document.getElementById("contrasena");
+let mensajeError = document.getElementById("mensajeError");
+let usuarioActual = document.getElementById("usuarioActual");
+let dejarDeEscuchar = null; // funcion que devuelve onSnapshot para parar de escuchar
+
+// Se ejecuta solo al cargar la pagina y cada vez que alguien entra o sale.
+// Gracias a esto, si recargas la pagina sigues con la sesion iniciada.
+onAuthStateChanged(auth, (usuario)=>{
+    if(usuario){
+        usuarioActual.textContent = usuario.email;
+        pantallaLogin.classList.add("oculto");
+        pantallaPostits.classList.remove("oculto");
+        escucharPostIts();
+    }else{
+        pararDeEscuchar();
+        pantallaPostits.classList.add("oculto");
+        pantallaLogin.classList.remove("oculto");
+    }
 });
+
+// Un solo formulario con dos botones: e.submitter dice cual se ha pulsado
+formLogin.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    mensajeError.textContent = "";
+
+    let email = inputEmail.value.trim();
+    let contrasena = inputContrasena.value;
+
+    try{
+        if(e.submitter && e.submitter.id == "btnRegistro"){
+            await createUserWithEmailAndPassword(auth, email, contrasena);
+        }else{
+            await signInWithEmailAndPassword(auth, email, contrasena);
+        }
+        formLogin.reset(); // el cambio de pantalla lo hace onAuthStateChanged
+    }catch(error){
+        mensajeError.textContent = traducirError(error.code);
+    }
+});
+
+document.getElementById("btnGoogle").addEventListener("click", async ()=>{
+    mensajeError.textContent = "";
+    try{
+        await signInWithPopup(auth, new GoogleAuthProvider());
+    }catch(error){
+        if(error.code != "auth/popup-closed-by-user"){
+            mensajeError.textContent = traducirError(error.code);
+        }
+    }
+});
+
+document.getElementById("btnSalir").addEventListener("click", ()=>{
+    signOut(auth);
+});
+
+function traducirError(codigo){
+    switch(codigo){
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+            return "Correo o contraseña incorrectos.";
+        case "auth/email-already-in-use":
+            return "Ya existe una cuenta con ese correo. Pulsa Entrar.";
+        case "auth/invalid-email":
+            return "El correo no es válido.";
+        case "auth/weak-password":
+            return "La contraseña debe tener al menos 6 caracteres.";
+        case "auth/too-many-requests":
+            return "Demasiados intentos. Espera un poco y vuelve a probar.";
+        case "auth/network-request-failed":
+            return "No hay conexión a internet.";
+        case "auth/popup-blocked":
+            return "El navegador ha bloqueado la ventana de Google.";
+        default:
+            return "Ha ocurrido un error (" + codigo + ").";
+    }
+}
+
+// ===================== LEER (tiempo real) =====================
+// Solo escuchamos Firebase cuando hay un usuario con sesion iniciada
+function escucharPostIts(){
+    if(dejarDeEscuchar != null) return; // ya estamos escuchando
+
+    // Cada vez que cambia algo en Firebase se borran los post-its y se vuelven a pintar
+    dejarDeEscuchar = onSnapshot(collection(db, "post-it"), (datos)=>{
+        document.querySelectorAll(".postit").forEach((p)=> p.remove());
+
+        datos.forEach((documento)=>{
+            crearPostIt(documento.id, documento.data());
+        });
+    });
+}
+
+function pararDeEscuchar(){
+    if(dejarDeEscuchar != null){
+        dejarDeEscuchar();
+        dejarDeEscuchar = null;
+    }
+    document.querySelectorAll(".postit").forEach((p)=> p.remove());
+    modalNota.classList.add("oculto");
+}
  
 function crearPostIt(id, nota){
     let postit = document.createElement("div");
     postit.classList.add("postit");
     postit.textContent = nota.texto;
     postit.style.backgroundColor = nota.color;
-    postit.style.left = nota.coordenadasX + "px";
-    postit.style.top = nota.coordenadasY + "px";
+    postit.style.left = nota.coordenadaX + "px";
+    postit.style.top = nota.coordenadaY + "px";
  
     if(nota.color == "black"){
         postit.style.color = "white";
@@ -177,8 +299,11 @@ function eventosPostIt(postit, id, nota){
         }
  
         if(movido){
-            postit.style.left = `${toque.clientX - offX}px`;
-            postit.style.top = `${toque.clientY - offY}px`;
+            // la nota no puede salirse del tablero
+            let x = limitar(toque.clientX - offX, 0, tablero.clientWidth - postit.offsetWidth);
+            let y = limitar(toque.clientY - offY, 0, tablero.clientHeight - postit.offsetHeight);
+            postit.style.left = `${x}px`;
+            postit.style.top = `${y}px`;
         }
     });
  
@@ -211,8 +336,8 @@ function eventosPostIt(postit, id, nota){
         }else{
             // Arrastre normal -> guardamos la nueva posicion
             updateDoc(doc(db, "post-it", id), {
-                coordenadasX: postit.offsetLeft,
-                coordenadasY: postit.offsetTop
+                coordenadaX: postit.offsetLeft,
+                coordenadaY: postit.offsetTop
             });
         }
     });

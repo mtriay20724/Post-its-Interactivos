@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -8,7 +8,34 @@
     <script type="module" src="js/index.js"></script>
 </head>
 <body>
+    <!-- Pantalla de login (se muestra si no hay sesion iniciada) -->
+    <section id="pantallaLogin" class="oculto">
+        <form id="formLogin">
+            <h2>Pizarra de Post-its</h2>
+
+            <label for="email">Correo</label>
+            <input type="email" id="email" autocomplete="email" required>
+
+            <label for="contrasena">Contraseña</label>
+            <input type="password" id="contrasena" autocomplete="current-password" minlength="6" required>
+
+            <p id="mensajeError"></p>
+
+            <button type="submit" id="btnLogin">Entrar</button>
+            <button type="submit" id="btnRegistro">Crear cuenta</button>
+
+            <div class="separador">o</div>
+            <button type="button" id="btnGoogle">Entrar con Google</button>
+        </form>
+    </section>
+
+    <!-- Pantalla de la pizarra (se muestra al iniciar sesion) -->
+    <div id="pantallaPostits" class="oculto">
     <h1>Seccion de notas</h1>
+    <div id="barraUsuario">
+        <span id="usuarioActual"></span>
+        <button id="btnSalir">Salir</button>
+    </div>
     <main class="tablero">
         <button id="crearNota">+</button>
 
@@ -30,6 +57,7 @@
             </div>
         </div>
     </main>
+    </div>
 
 </body>
 </html>

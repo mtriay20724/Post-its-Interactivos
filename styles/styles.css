@@ -119,3 +119,74 @@ h1 {
 .oculto {
     display: none !important;
 }
+
+/* ===================== LOGIN ===================== */
+#pantallaLogin {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: antiquewhite;
+}
+
+#formLogin {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 280px;
+    padding: 24px;
+    background-color: #fff475;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#formLogin h2 {
+    margin: 0 0 8px;
+    text-align: center;
+}
+
+#formLogin input {
+    padding: 10px;
+    font-size: 16px; /* con menos de 16px el iPhone hace zoom al escribir */
+    border: 1px solid #999;
+    border-radius: 4px;
+}
+
+#formLogin button {
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#btnLogin { background-color: orange; color: white; }
+#btnRegistro { background-color: white; }
+#btnGoogle { background-color: white; border: 1px solid #999 !important; }
+
+#mensajeError {
+    margin: 0;
+    min-height: 1em;
+    color: #b00020;
+    font-size: 14px;
+}
+
+.separador {
+    text-align: center;
+    color: #555;
+}
+
+#barraUsuario {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+#btnSalir {
+    padding: 6px 12px;
+}
