@@ -141,7 +141,7 @@ async function guardarNota(){
 }
  
  
-// ===================== LOGIN =====================
+//LOGIN 
 let pantallaLogin = document.getElementById("pantallaLogin");
 let pantallaPostits = document.getElementById("pantallaPostits");
 let formLogin = document.getElementById("formLogin");
@@ -149,10 +149,9 @@ let inputEmail = document.getElementById("email");
 let inputContrasena = document.getElementById("contrasena");
 let mensajeError = document.getElementById("mensajeError");
 let usuarioActual = document.getElementById("usuarioActual");
-let dejarDeEscuchar = null; // funcion que devuelve onSnapshot para parar de escuchar
+let dejarDeEscuchar = null;
 
 // Se ejecuta solo al cargar la pagina y cada vez que alguien entra o sale.
-// Gracias a esto, si recargas la pagina sigues con la sesion iniciada.
 onAuthStateChanged(auth, (usuario)=>{
     if(usuario){
         usuarioActual.textContent = usuario.email;
@@ -166,7 +165,7 @@ onAuthStateChanged(auth, (usuario)=>{
     }
 });
 
-// Un solo formulario con dos botones: e.submitter dice cual se ha pulsado
+
 formLogin.addEventListener("submit", async (e)=>{
     e.preventDefault();
     mensajeError.textContent = "";
@@ -180,7 +179,7 @@ formLogin.addEventListener("submit", async (e)=>{
         }else{
             await signInWithEmailAndPassword(auth, email, contrasena);
         }
-        formLogin.reset(); // el cambio de pantalla lo hace onAuthStateChanged
+        formLogin.reset(); 
     }catch(error){
         mensajeError.textContent = traducirError(error.code);
     }
@@ -224,7 +223,7 @@ function traducirError(codigo){
     }
 }
 
-// ===================== LEER (tiempo real) =====================
+//  LEER 
 // Solo escuchamos Firebase cuando hay un usuario con sesion iniciada
 function escucharPostIts(){
     if(dejarDeEscuchar != null) return; // ya estamos escuchando
